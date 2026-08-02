@@ -1,0 +1,167 @@
+### java-lgbm-serving - scorer HTTP API (JetBrains HTTP Client)
+#
+# Конвейер decline->explain. Эндпойнты: POST /score, GET /explain/{id}, GET /metrics.
+# {{host}} - из http-client.env.json (окружение "local" вверху редактора).
+#
+# Запуск на закоммиченной фикстуре, обучение не нужно:
+#   make run
+#
+# /score: "features" - ровно 12 чисел в порядке feature_names из model.txt:
+#    0 rtt_ms            RTT входа, мс
+#    1 login_successful  вход успешен (0/1)
+#    2 hour              час суток (0-23)
+#    3 dow               день недели (0-6)
+#    4 n_prior_logins    прошлых входов пользователя
+#    5 secs_since_last   секунд с прошлого входа (-1 у первого)
+#    6 is_new_country    новая страна (0/1)
+#    7 is_new_city       новый город (0/1)
+#    8 is_new_asn        новый ASN (0/1)
+#    9 is_new_os         новая ОС (0/1)
+#   10 is_new_browser    новый браузер (0/1)
+#   11 is_new_device     новое устройство (0/1)
+#
+# Missing-значение признака передаётся как null (JSON не умеет NaN); сервис
+# превращает его в NaN, и предсказание идёт по missing-веткам деревьев.
+#
+# decline при margin > threshold (0 по умолчанию), иначе approve. SHAP считается
+# асинхронно вне горячего пути: /explain доступен только для отклонений и спустя
+# мгновение после /score. Объяснение best-effort: explain_queued=false в ответе
+# означает, что объяснения не будет (очередь полна или решение - approve).
+
+### POST /score - отклонение (margin > 0)
+# Успех, ничего нового, но 1188 входов в 3 ночи -> margin 2.70, decline.
+# @name score_decline
+POST {{host}}/score
+Content-Type: application/json
+
+{
+  "features": [384, 1, 3, 1, 1188, 809.6929932, 0, 0, 0, 0, 0, 0]
+}
+
+> {%
+    client.test("200 OK", function () {
+        client.assert(response.status === 200, "status " + response.status);
+    });
+    client.test("decision is decline", function () {
+        client.assert(response.body.decision === "decline", "got " + response.body.decision);
+    });
+    client.test("explanation queued", function () {
+        client.assert(response.body.explain_queued === true, "explanation was dropped");
+    });
+    client.global.set("declineId", response.body.id);
+    client.log("decline id=" + response.body.id + " margin=" + response.body.margin);
+%}
+
+### GET /explain/{id} - коды причин последнего отклонения (нужен score_decline выше)
+# Асинхронно: при 404 сразу - повторить через мгновение, воркер вот-вот сохранит.
+GET {{host}}/explain/{{declineId}}
+Accept: application/json
+
+> {%
+    client.test("200 OK", function () {
+        client.assert(response.status === 200, "status " + response.status);
+    });
+    client.test("has reason codes", function () {
+        client.assert(response.body.reasons.length > 0, "no reasons");
+    });
+    client.log("top reason: " + response.body.reasons[0].code +
+               " contribution=" + response.body.reasons[0].contribution +
+               " base=" + response.body.base + " margin=" + response.body.margin);
+%}
+
+### POST /score - одобрение (margin <= 0)
+# Вернувшийся пользователь, ничего нового -> margin отрицательная, approve.
+# @name score_approve
+POST {{host}}/score
+Content-Type: application/json
+
+{
+  "features": [30, 1, 14, 2, 200, 3600, 0, 0, 0, 0, 0, 0]
+}
+
+> {%
+    client.test("200 OK", function () {
+        client.assert(response.status === 200, "status " + response.status);
+    });
+    client.test("decision is approve", function () {
+        client.assert(response.body.decision === "approve", "got " + response.body.decision);
+    });
+    client.global.set("approveId", response.body.id);
+%}
+
+### GET /explain/{id} - 404 для одобрения (одобрения не объясняются)
+GET {{host}}/explain/{{approveId}}
+Accept: application/json
+
+> {%
+    client.test("404 Not Found", function () {
+        client.assert(response.status === 404, "status " + response.status);
+    });
+%}
+
+### GET /explain/{id} - 404 для неизвестного id
+GET {{host}}/explain/deadbeefdeadbeefdeadbeef
+Accept: application/json
+
+> {%
+    client.test("404 Not Found", function () {
+        client.assert(response.status === 404, "status " + response.status);
+    });
+%}
+
+### POST /score - missing-признаки: null -> NaN -> missing-ветки деревьев
+# Непомеренный RTT (~96% строк датасета) передаётся как null, не как 0.
+POST {{host}}/score
+Content-Type: application/json
+
+{
+  "features": [null, 1, 14, 2, 200, 3600, 0, 0, 0, 0, 0, 0]
+}
+
+> {%
+    client.test("200 OK", function () {
+        client.assert(response.status === 200, "status " + response.status);
+    });
+%}
+
+### GET /metrics - счётчики горячего пути, очередь explain, прогресс воркера
+GET {{host}}/metrics
+Accept: application/json
+
+> {%
+    client.test("200 OK", function () {
+        client.assert(response.status === 200, "status " + response.status);
+    });
+    client.log("scored=" + response.body.scored +
+               " declined=" + response.body.declined +
+               " decline_rate=" + response.body.decline_rate +
+               " explained=" + response.body.explained +
+               " queue_len=" + response.body.queue_len +
+               " dropped=" + response.body.queue_dropped);
+%}
+
+### POST /score - 400: битый JSON
+POST {{host}}/score
+Content-Type: application/json
+
+{ "features": [1, 2, 3
+
+> {%
+    client.test("400 Bad Request", function () {
+        client.assert(response.status === 400, "status " + response.status);
+    });
+%}
+
+### POST /score - 422: неверное число признаков (нужно ровно 12)
+POST {{host}}/score
+Content-Type: application/json
+
+{
+  "features": [1, 2, 3]
+}
+
+> {%
+    client.test("422 Unprocessable Entity", function () {
+        client.assert(response.status === 422, "status " + response.status);
+    });
+%}
