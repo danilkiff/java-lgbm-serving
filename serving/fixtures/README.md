@@ -1,12 +1,12 @@
 # Фикстуры для примеров и тестов механики
 
 Происхождение - каталог `fixtures/` репозитория эталонов
-[lgbm-training](https://github.com/danilkiff/lgbm-training), коммит `9acf547`.
+[lgbm-training](https://github.com/danilkiff/lgbm-training), тег `v0.2.0`.
 Обновляются вместе с моделью.
 
 Здесь:
 
-- `model.txt` - RBA-модель (12 поведенческих признаков, цель Is Attack IP). Нужна,
+- `model.txt` - RBA-модель (25 поведенческих признаков, метка Is Attack IP). Нужна,
 чтобы примеры `clients/http/` и тесты конвейера работали без эталонов паритета;
 - `codes.json` - индекс признака в код причины (`NPRIOR`, `GAP`, ...);
 - `multiclass.txt` - трёхклассовая модель для негативного теста загрузки:
