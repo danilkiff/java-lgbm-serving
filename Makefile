@@ -1,4 +1,4 @@
-REFS ?= local:../go-lgbm-serving/training/testdata
+REFS ?= local:../lgbm-training/testdata
 
 .DEFAULT_GOAL := help
 .PHONY: help native refs print-env build test bench bench-smoke run dump clean

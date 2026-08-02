@@ -8,7 +8,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-REPO=${REFS_REPO:-danilkiff/lgbm-reference}
+REPO=${REFS_REPO:-danilkiff/lgbm-training}
 FILES="model.txt holdout.csv ref_raw.csv ref_contrib.csv meta.json"
 
 src=${1:?"usage: refs.sh <local:path|release:tag> <dst>"}

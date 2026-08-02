@@ -1,3 +1,3 @@
-# sha256 архивов эталонов по тегам репозитория danilkiff/lgbm-reference,
-# формат `shasum -a 256`. Пока репозиторий эталонов не опубликован, источник -
-# local:<path> на чекаут (см. Makefile, цель refs).
+# sha256 архивов эталонов по тегам репозитория danilkiff/lgbm-training,
+# формат `shasum -a 256`. Пока релизов нет, источник - local:<path> на чекаут
+# (см. Makefile, цель refs).

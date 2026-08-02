@@ -29,22 +29,21 @@ jobs:
       - name: Native LightGBM
         run: make native
 
-      # Временно: репозиторий эталонов ещё не опубликован, поэтому эталоны
-      # порождаются в чекауте go-lgbm-serving. Снимается заменой на
-      # `make refs REFS=release:<tag>`.
+      # Временно: пока в репозитории эталонов нет релизов, эталоны порождаются в
+      # его чекауте. Снимается заменой на `make refs REFS=release:<tag>`.
       - uses: actions/checkout@v6
         with:
-          repository: danilkiff/go-lgbm-serving
+          repository: danilkiff/lgbm-training
           path: .refs-src
 
       - name: Reference artifacts
         run: |
-          cd .refs-src/training
+          cd .refs-src
           uv sync --no-default-groups
           make data
 
       - name: Fetch refs
-        run: make refs REFS=local:.refs-src/training/testdata
+        run: make refs REFS=local:.refs-src/testdata
 
       - name: Build and test
         run: make test
