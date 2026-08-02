@@ -1,0 +1,9 @@
+# Версия обязана совпадать с той, что обучала модель (meta.json, lightgbm_version):
+# паритет здесь битовый только потому, что FFM грузит те же байты lib_lightgbm,
+# что исполнял Python. Гейт версии - в тестах паритета.
+# Хеши колёс всех поддерживаемых платформ, uv выбирает подходящее.
+lightgbm==4.6.0 \
+    --hash=sha256:2dafd98d4e02b844ceb0b61450a660681076b1ea6c7adb8c566dfd66832aafad \
+    --hash=sha256:b7a393de8a334d5c8e490df91270f0763f83f959574d504c7ccb9eee4aef70ed \
+    --hash=sha256:cb19b5afea55b5b61cbb2131095f50538bd608a00655f23ad5d25ae3e3bf1c8d \
+    --hash=sha256:4d68712bbd2b57a0b14390cbf9376c1d5ed773fa2e71e099cac588703b590336
