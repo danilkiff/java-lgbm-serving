@@ -1,0 +1,13 @@
+# uv
+native/.venv/
+
+# Gradle
+serving/.gradle/
+serving/build/
+
+# IDE
+.idea/
+*.iml
+
+# Эталоны паритета (получить через `make refs`)
+/refs/

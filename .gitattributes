@@ -1,0 +1,6 @@
+# не учитываем модели в списке языков GH
+serving/fixtures/*.txt linguist-generated
+# обёртка Gradle - вендоренный код
+serving/gradlew linguist-vendored
+serving/gradlew.bat linguist-vendored
+serving/gradle/wrapper/** linguist-vendored
