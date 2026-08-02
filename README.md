@@ -74,8 +74,9 @@ Temurin JDK 25.0.4, Go 1.26.5, `make bench` в обоих репозитория
 make              # список целей
 ```
 
-Эталоны паритета берутся из релиза репозитория эталонов
-(`make refs REFS=release:<tag>`) либо из чекаута (`make refs REFS=local:<path>`).
+Эталоны паритета берутся из релиза репозитория
+[lgbm-training](https://github.com/danilkiff/lgbm-training)
+(`make refs REFS=release:<tag>`) либо из его чекаута (`make refs REFS=local:<path>`).
 
 ## См. также
 
