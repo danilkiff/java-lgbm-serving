@@ -4,7 +4,7 @@
 # Требует: uv, JDK 25 (см. serving/build.gradle.kts), рантайм OpenMP
 # (Linux: libgomp; macOS: brew install libomp).
 # Источник эталонов задаётся переменной REFS (по умолчанию - соседний чекаут
-# go-lgbm-serving); повторный запуск идемпотентен.
+# lgbm-training); повторный запуск идемпотентен.
 set -euo pipefail
 cd "$(dirname "$0")"
 
