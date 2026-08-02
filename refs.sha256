@@ -1,3 +1,3 @@
 # sha256 архивов эталонов по тегам репозитория danilkiff/lgbm-training,
-# формат `shasum -a 256`. Пока релизов нет, источник - local:<path> на чекаут
-# (см. Makefile, цель refs).
+# формат `shasum -a 256`. Проверяется при `make refs REFS=release:<tag>`.
+b5b8c92e5bd916e4d304cbb39427cb2c823ba62c2d953025e907b3765d0033bf  refs-v0.1.0.tar.gz

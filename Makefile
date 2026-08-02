@@ -1,4 +1,4 @@
-REFS ?= local:../lgbm-training/testdata
+REFS ?= release:v0.1.0
 
 .DEFAULT_GOAL := help
 .PHONY: help native refs print-env build test bench bench-smoke run dump clean
