@@ -1,7 +1,7 @@
 REFS ?= local:../go-lgbm-serving/training/testdata
 
 .DEFAULT_GOAL := help
-.PHONY: help native refs print-env build test run clean
+.PHONY: help native refs print-env build test run dump clean
 
 help: ## показать цели этого Makefile
 	@grep -hE '^[a-zA-Z][a-zA-Z_-]*:.*## ' $(MAKEFILE_LIST) | \
@@ -26,6 +26,9 @@ test: ## паритет, конкуренция, юнит-тесты
 
 run: ## запустить scorer на фикстуре (доп. флаги через ARGS=)
 	@$(MAKE) -C serving run ARGS="$(ARGS)"
+
+dump: ## дамп предсказаний этой платформы в refs/
+	@$(MAKE) -C serving dump
 
 clean: ## удалить артефакты сборки и эталоны
 	@$(MAKE) -C serving clean
